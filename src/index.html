@@ -1,0 +1,54 @@
+<!-- client -->
+<html>
+  <body>
+    <h1>simple chat</h1>
+    <span>名前</span><br><input id="inputText" type="text"><br>
+    <span>文章</span><br><textarea id="inputSent" cols="30" rows="10"></textarea>
+
+    <input id="sendButton" type="submit">
+    <ul id="messageList" />
+
+    <script src="/socket.io/socket.io.js"></script><!-- Import-->
+    <script>
+
+      const socket = io();
+
+      const clearText = () => {//入力した文字を消す
+        document.getElementById('inputText').value = '';
+        document.getElementById('inputSent').value = '';
+
+      }
+
+      const addMessageList = (message) => {
+        const ul = document.getElementById('messageList');
+        const li = document.createElement('li');
+        const text = document.createTextNode(message);//<li>Text<li>　的な感じになる
+        li.appendChild(text);
+        ul.appendChild(li);
+      };
+
+      document.getElementById('sendButton').addEventListener('click', () => {
+        let inputMessage = document.getElementById('inputText').value;
+        let inputSent = document.getElementById("inputSent").value;
+
+        let Message = {name: inputMessage , sent : inputSent, id : 0};
+
+        if (inputMessage === '' || inputSent ==="") {
+          return;
+        }
+
+        socket.emit('sendMessage', Message);//サーバーに送る
+        
+        clearText();
+      });
+
+      //  'receiveMessage' イベントの発火を検知
+      //  第一引数には受信したメッセージが入る
+      socket.on('receiveMessage', (message) => {//サーバから受け取ったら
+        // 受信したメッセージをulタグに挿入
+        addMessageList(message);
+
+      });
+    </script>
+  </body>
+</html>
